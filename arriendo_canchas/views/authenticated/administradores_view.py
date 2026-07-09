@@ -2,6 +2,7 @@
 
 from flet import Column, Row, Text, ElevatedButton, TextField, DataTable, DataColumn, DataRow, DataCell, IconButton, icons, AlertDialog, TextButton
 from services.database_service import DatabaseService
+from security.passwords import pwd_context
 
 def AdministradoresView(page, user_vm):
     db_service = DatabaseService()
@@ -61,13 +62,14 @@ def AdministradoresView(page, user_vm):
             correo = correo_field.value
             contrasena = contrasena_field.value
 
-            # Insertar en la base de datos
+                        # Insertar en la base de datos
             try:
+                hashed_password = pwd_context.hash(contrasena)
                 query = """
                 INSERT INTO usuarios (nombre, correo, contrasena, tipo_cuenta)
-                VALUES (%s, %s, crypt(%s, gen_salt('bf')), 'Administrador')
+                VALUES (%s, %s, %s, 'Administrador')
                 """
-                cursor.execute(query, (nombre, correo, contrasena))
+                cursor.execute(query, (nombre, correo, hashed_password))
                 db_service.connection.commit()
                 page.dialog.open = False
                 refresh_data()

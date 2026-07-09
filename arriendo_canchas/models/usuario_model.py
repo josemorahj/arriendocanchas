@@ -2,6 +2,7 @@
 
 import psycopg2
 from services.database_service import DatabaseService
+from security.passwords import pwd_context
 
 class UsuarioModel:
     def __init__(self):
@@ -19,11 +20,12 @@ class UsuarioModel:
         return [{'id_usuario': u[0], 'nombre': u[1], 'correo': u[2]} for u in usuarios]
 
     def add_usuario(self, rut, nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena, tipo_cuenta, id_admin_responsable=None):
+        hashed_password = pwd_context.hash(contrasena)
         query = """
         INSERT INTO Usuarios (rut, nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena, tipo_cuenta, id_admin_responsable)
-        VALUES (%s, %s, %s, %s, %s, %s, crypt(%s, gen_salt('bf')), %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        self.cursor.execute(query, (rut, nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena, tipo_cuenta, id_admin_responsable))
+        self.cursor.execute(query, (rut, nombre, apellido_paterno, apellido_materno, telefono, correo, hashed_password, tipo_cuenta, id_admin_responsable))
         self.db_service.connection.commit()
 
     def update_usuario(self, id_usuario, nombre, correo):
@@ -37,12 +39,13 @@ class UsuarioModel:
 
     def update_usuario_full(self, id_usuario, nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena=None):
         if contrasena:
+            hashed_password = pwd_context.hash(contrasena)
             query = """
             UPDATE Usuarios 
-            SET nombre = %s, apellido_paterno = %s, apellido_materno = %s, telefono = %s, correo = %s, contrasena = crypt(%s, gen_salt('bf')) 
+            SET nombre = %s, apellido_paterno = %s, apellido_materno = %s, telefono = %s, correo = %s, contrasena = %s
             WHERE id_usuario = %s
             """
-            self.cursor.execute(query, (nombre, apellido_paterno, apellido_materno, telefono, correo, contrasena, id_usuario))
+            self.cursor.execute(query, (nombre, apellido_paterno, apellido_materno, telefono, correo, hashed_password, id_usuario))
         else:
             query = """
             UPDATE Usuarios 
@@ -78,3 +81,4 @@ class UsuarioModel:
 
     def close(self):
         self.db_service.close()
+

@@ -2,6 +2,7 @@
 
 from flet import Column, Row, Text, ElevatedButton, TextField, DataTable, DataColumn, DataRow, DataCell, IconButton, icons, AlertDialog, TextButton
 from services.database_service import DatabaseService
+from security.passwords import pwd_context
 
 def ArrendadoresView(page, user_vm):
     db_service = DatabaseService()
@@ -49,7 +50,7 @@ def ArrendadoresView(page, user_vm):
 
     data_table.rows = [create_data_row(arrendador) for arrendador in arrendador_list]
 
-    # Funciones para agregar, editar y eliminar
+        # Funciones para agregar, editar y eliminar
 
     def open_add_dialog(e):
         nombre_field = TextField(label="Nombre")
@@ -63,11 +64,12 @@ def ArrendadoresView(page, user_vm):
 
             # Insertar en la base de datos
             try:
+                hashed_password = pwd_context.hash(contrasena)
                 query = """
                 INSERT INTO usuarios (nombre, correo, contrasena, tipo_cuenta)
-                VALUES (%s, %s, crypt(%s, gen_salt('bf')), 'ClienteArrendador')
+                VALUES (%s, %s, %s, 'ClienteArrendador')
                 """
-                cursor.execute(query, (nombre, correo, contrasena))
+                cursor.execute(query, (nombre, correo, hashed_password))
                 db_service.connection.commit()
                 page.dialog.open = False
                 refresh_data()
