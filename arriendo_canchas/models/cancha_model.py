@@ -1,5 +1,3 @@
-# arriendo_canchas/arriendo_canchas/models/cancha_model.py
-
 import psycopg2
 from services.database_service import DatabaseService
 
@@ -66,6 +64,20 @@ class CanchaModel:
             }
         return None
 
+    def fetch_canchas_by_complejo(self, id_complejo):
+        query = """
+        SELECT id_cancha, nombre_cancha, tipo_cancha
+        FROM Canchas
+        WHERE id_complejo = %s
+        """
+        self.cursor.execute(query, (id_complejo,))
+        canchas = self.cursor.fetchall()
+        return [{
+            'id_cancha': c[0],
+            'nombre_cancha': c[1],
+            'tipo_cancha': c[2]
+        } for c in canchas]
+
     def fetch_disponibilidad(self, id_cancha):
         query = """
         SELECT id_disponibilidad, fecha, hora_inicio, hora_fin
@@ -81,28 +93,36 @@ class CanchaModel:
             'hora_inicio': d[2],
             'hora_fin': d[3]
         } for d in disponibilidad]
-    
+
     def add_disponibilidad(self, id_cancha, fecha, hora_inicio, hora_fin):
         query = """
         INSERT INTO DisponibilidadCanchas (id_cancha, fecha, hora_inicio, hora_fin)
         VALUES (%s, %s, %s, %s)
         """
-        self.cursor.execute(query, (id_cancha, fecha, hora_inicio, hora_fin))
-        self.db_service.connection.commit()
-    
+        try:
+            self.cursor.execute(query, (id_cancha, fecha, hora_inicio, hora_fin))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
+
     def update_disponibilidad(self, id_disponibilidad, fecha, hora_inicio, hora_fin):
         query = """
         UPDATE DisponibilidadCanchas
         SET fecha = %s, hora_inicio = %s, hora_fin = %s
         WHERE id_disponibilidad = %s
         """
-        self.cursor.execute(query, (fecha, hora_inicio, hora_fin, id_disponibilidad))
-        self.db_service.connection.commit()
-    
+        try:
+            self.cursor.execute(query, (fecha, hora_inicio, hora_fin, id_disponibilidad))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
+
     def delete_disponibilidad(self, id_disponibilidad):
         query = "DELETE FROM DisponibilidadCanchas WHERE id_disponibilidad = %s"
         self.cursor.execute(query, (id_disponibilidad,))
-        self.db_service.connection.commit()
-    
+        return self.cursor.rowcount
+
     def close(self):
         self.db_service.close()

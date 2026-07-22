@@ -1,24 +1,22 @@
-# main.py
-
 import flet
-from flet import Page, Text, Column, Row, Container
+from flet import Container, Page, Row, Text
+from route_guard import require_role
+from viewmodels.user_viewmodel import UserViewModel
+from views.authenticated.acceso_denegado_view import AccesoDenegadoView
+from views.authenticated.admin_dashboard_view import AdminDashboardView
+from views.authenticated.buscar_complejos_view import BuscarComplejosView
+from views.authenticated.canchas_view import CanchasView
+from views.authenticated.complejos_view import ComplejosView
+from views.authenticated.gestion_reclamos_view import GestionReclamosView
+from views.authenticated.mis_datos_view import MisDatosView
+from views.authenticated.mis_reclamos_view import MisReclamosView
+from views.authenticated.mis_reservas_view import MisReservasView
+from views.authenticated.usuario_dashboard_view import UsuarioDashboardView
 from views.home_view import HomeView
 from views.login_view import LoginView
 from views.widgets.navbar import Navbar as LandingNavbar
 from views.widgets.navbar_pages import Navbar as AuthenticatedNavbar
 from views.widgets.sidebar import Sidebar
-from viewmodels.user_viewmodel import UserViewModel
-
-from route_guard import require_role
-from views.authenticated.complejos_view import ComplejosView
-from views.authenticated.canchas_view import CanchasView
-from views.authenticated.mis_datos_view import MisDatosView
-from views.authenticated.buscar_complejos_view import BuscarComplejosView
-from views.authenticated.mis_reservas_view import MisReservasView
-from views.authenticated.mis_reclamos_view import MisReclamosView
-from views.authenticated.admin_dashboard_view import AdminDashboardView
-from views.authenticated.usuario_dashboard_view import UsuarioDashboardView
-from views.authenticated.acceso_denegado_view import AccesoDenegadoView
 
 
 def main(page: Page):
@@ -34,7 +32,7 @@ def main(page: Page):
         "services": "services_section",
         "clients": "clients_section",
         "contact": "contact_section",
-        "login": "login_section"
+        "login": "login_section",
     }
 
     # Estado para controlar la visibilidad del sidebar
@@ -54,7 +52,9 @@ def main(page: Page):
         if user_vm.is_authenticated():
 
             # Normalizar "/" → "/dashboard" antes de evaluar permisos
-            effective_route = "/dashboard" if page.route == "/" else page.route
+            effective_route = (
+                "/dashboard" if page.route == "/" else page.route
+            )
 
             # 1) Evaluar permiso mediante route_guard
             guard_result = require_role(user_vm, effective_route)
@@ -68,13 +68,19 @@ def main(page: Page):
             # Rama FORBIDDEN: mostrar acceso denegado
             if guard_result == "FORBIDDEN":
                 content = AccesoDenegadoView(page, user_vm)
-                page.appbar = AuthenticatedNavbar(page, user_vm, toggle_sidebar)
+                page.appbar = AuthenticatedNavbar(
+                    page, user_vm, toggle_sidebar
+                )
                 page.add(
                     Row(
                         controls=[
                             Container(
                                 width=200 if sidebar_visible else 0,
-                                content=Sidebar(page, user_vm) if sidebar_visible else None,
+                                content=(
+                                    Sidebar(page, user_vm)
+                                    if sidebar_visible
+                                    else None
+                                ),
                             ),
                             Container(expand=True, content=content),
                         ],
@@ -110,6 +116,8 @@ def main(page: Page):
                 content = MisReservasView(page, user_vm)
             elif effective_route == "/mis_reclamos":
                 content = MisReclamosView(page, user_vm)
+            elif effective_route == "/gestion_reclamos":
+                content = GestionReclamosView(page, user_vm)
             else:
                 content = Text("Página no encontrada")
 
@@ -119,7 +127,11 @@ def main(page: Page):
                     controls=[
                         Container(
                             width=200 if sidebar_visible else 0,
-                            content=Sidebar(page, user_vm) if sidebar_visible else None,
+                            content=(
+                                Sidebar(page, user_vm)
+                                if sidebar_visible
+                                else None
+                            ),
                         ),
                         Container(expand=True, content=content),
                     ],

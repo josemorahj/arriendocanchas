@@ -1,11 +1,8 @@
-# route_guard.py
-# Módulo aislado de control de acceso por ruta.
-# Sin dependencias de vistas, main.py ni sidebar.py.
-
 ROUTE_ROLES = {
     "/dashboard": ["Administrador", "Usuario"],
     "/mis_complejos": ["Administrador"],
     "/mis_canchas": ["Administrador"],
+    "/gestion_reclamos": ["Administrador"],
     "/mis_datos": ["Usuario"],
     "/buscar_complejos": ["Usuario"],
     "/mis_reservas": ["Usuario"],

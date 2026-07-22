@@ -29,10 +29,15 @@ def Sidebar(page, user_vm):
                 title=Text("Mis Complejos"),
                 on_click=lambda e: navigate_to("/mis_complejos"),
             ),
-            ListTile(
+                        ListTile(
                 leading=Icon(icons.SPORTS_SOCCER),
                 title=Text("Mis Canchas"),
                 on_click=lambda e: navigate_to("/mis_canchas"),
+            ),
+            ListTile(
+                leading=Icon(icons.REPORT),
+                title=Text("Gestionar Reclamos"),
+                on_click=lambda e: navigate_to("/gestion_reclamos"),
             ),
         ])
     elif user_type == "Usuario":

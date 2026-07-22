@@ -11,14 +11,14 @@ class LoginViewModel:
         db_service = DatabaseService()
         try:
             query = """
-            SELECT id_usuario, nombre, tipo_cuenta, contrasena
+            SELECT id_usuario, rut, nombre, tipo_cuenta, contrasena
             FROM usuarios
             WHERE correo = %s
             """
             db_service.cursor.execute(query, (correo,))
             user = db_service.cursor.fetchone()
             if user:
-                user_id, nombre, tipo_cuenta, hashed_password = user
+                user_id, rut, nombre, tipo_cuenta, hashed_password = user
                 # Verificar la contraseña con passlib
                 try:
                     password_match = pwd_context.verify(contrasena, hashed_password)
@@ -29,6 +29,7 @@ class LoginViewModel:
                     # Devolver los datos del usuario
                     user_data = {
                         'id_usuario': user_id,
+                        'rut': rut,
                         'nombre': nombre,
                         'tipo_cuenta': tipo_cuenta,
                         'correo': correo,
@@ -40,4 +41,3 @@ class LoginViewModel:
             return None
         finally:
             db_service.close()
-
