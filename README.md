@@ -18,10 +18,14 @@ Plataforma de arriendo de canchas deportivas construida con **Flet + PostgreSQL*
 | **Hito 1** | ✅ Completado | Schema SQL, seed data, documentación de bugs |
 | **Hito 2** | ✅ Completado | Consolidación de roles (6 → 2: Administrador, Usuario) |
 | **Hito 3** | ✅ Completado | Protección de rutas autenticadas con `route_guard` |
-| **Hito 4.1** | 🟡 ~85% | **Reservas** — En validación funcional |
-| **Hito 4.2** | ⏳ Pendiente | Reclamos |
-| **Hito 4.3** | ⏳ Pendiente | Gestión administrativa (CRUD Complejos/Canchas/Disponibilidades) |
+| **Hito 4** | ✅ Completado | Reservas + Reclamos + Datos semilla + Documentación |
+| **Hito 4.4** | ⏳ Pendiente | Corrección del patrón transaccional (conexiones compartidas) |
 
+> ⚠️ **Freeze transaccional vigente:** Hasta iniciar oficialmente el Hito 4.4, no modificar:
+> - `reserva_model.py`, `cancha_model.py`, `buscar_complejos_view.py`
+> - Ni ningún archivo que coordine la transacción de reservas.
+>
+> **Deuda arquitectónica:** `DatabaseService` crea una conexión PostgreSQL por instancia. Esto impide atomicidad real en el flujo de reservas, donde `DELETE disponibilidad` y `INSERT reserva` ocurren en conexiones distintas. Esta deuda se abordará exclusivamente en el Hito 4.4.
 ---
 
 ## Requisitos

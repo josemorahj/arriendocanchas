@@ -3,7 +3,7 @@
 > **Contexto:** Este archivo documenta bugs encontrados durante el desarrollo,
 > tanto los ya corregidos como los pendientes.
 >
-> **Última actualización:** Hito 4.1 — Reservas
+> **Última actualización:** Post-Hito 4 — Tarea 4.3.3
 ---
 
 ## Bugs Corregidos
@@ -67,13 +67,20 @@
 - **Solución:** Script temporal que regeneró los hashes con `pwd_context.hash("Prueba123!")`.
 - **Corregido el:** 16-07-2026
 
-### BUG 4.1.4: Error "No se pudo realizar la reserva" 🔴 BLOQUEANTE
+### BUG 4.1.4: Error "No se pudo realizar la reserva" ✅ (Hito 4.4)
 
-- **Estado:** Pendiente de diagnóstico
+- **Estado:** Cerrado — archivado como deuda arquitectónica
 - **Síntoma:** El flujo de reserva entra al bloque `except` de `reservar_cancha()` y muestra el mensaje "No se pudo realizar la reserva."
-- **Información conocida:**
-  - Se ejecuta rollback automático.
-  - La excepción exacta aún no ha sido identificada (falta instrumentar el bloque `except`).
-- **Próxima acción:** Instrumentar el bloque `except` para capturar el traceback completo e identificar la línea exacta que lanza la excepción.
+- **Causa raíz:** Deuda arquitectónica: `DatabaseService` crea conexiones PostgreSQL independientes por instancia, por lo que `DELETE disponibilidad` (Conexión A) e `INSERT reserva` (Conexión B) ocurren en transacciones separadas sin atomicidad real.
 - **Archivo:** `views/authenticated/buscar_complejos_view.py`
+- **Resuelto en:** Se abordará dentro del Hito 4.4 (Fundamentos transaccionales)
+---
 
+## Deuda arquitectónica — Patrón transaccional (Hito 4.4)
+
+### `DatabaseService` con conexiones independientes
+
+- **Problema:** Cada modelo (`CanchaModel`, `ReservaModel`, etc.) crea su propia instancia de `DatabaseService`, cada una con su propia conexión PostgreSQL. Esto impide que operaciones como `DELETE disponibilidad` e `INSERT reserva` compartan la misma transacción.
+- **Impacto:** No existe atomicidad real en el flujo de reservas. La concurrencia se maneja a nivel aplicación (rowcount), pero la transacción no es única.
+- **Solución propuesta (Hito 4.4):** Implementar un mecanismo de conexión compartida (singleton, pool, o inyección de conexión).
+- **Freeze vigente:** No modificar `reserva_model.py`, `cancha_model.py`, `buscar_complejos_view.py` ni archivos del flujo de reservas hasta iniciar Hito 4.4.

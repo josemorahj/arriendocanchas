@@ -26,14 +26,15 @@ tomando como base el repositorio heredado `arriendocanchas`.
 | **Hito 1 — Schema + Bugs** | schema.sql desde código fuente, documentación de bugs | `23fe659` |
 | **Hito 2 — Roles** | Consolidación de 6 roles → 2 (Administrador, Usuario) | `2f94cc1` |
 | **Hito 3 — Rutas** | route_guard, protección de rutas autenticadas | `2f94cc1` |
+| **Hito 4 — Reservas + Reclamos + Documentación** | Flujo completo de reservas, concurrencia, reclamos, seed de desarrollo, documentación | `bd8fe28`, `1cb56af` |
 
-### Hito en Curso
+### Hito en Curso / Pendiente
 
 | Hito | Estado | Próximo objetivo |
 |---|---|---|
-| **Hito 4.1 — Reservas** | 🟡 ~85%, en validación funcional | Identificar excepción en reserva |
-| **Hito 4.2 — Reclamos** | ⏳ Pendiente | Revisar sesión (rut), MisReclamosView, estado, id_admin_responsable |
-| **Hito 4.3 — Gestión Admin** | ⏳ Pendiente | CRUD Complejos, CRUD Canchas, CRUD Disponibilidades |
+| **Hito 4.4 — Fundamentos transaccionales** | ⏳ Pendiente | Corregir patrón transaccional (conexiones compartidas entre modelos) |
+
+> ⚠️ **Freeze transaccional vigente:** Hasta iniciar el Hito 4.4, no modificar `reserva_model.py`, `cancha_model.py`, `buscar_complejos_view.py` ni el flujo de reservas.
 ---
 
 ## 3. Decisiones de Arquitectura ya Implementadas
@@ -46,6 +47,7 @@ tomando como base el repositorio heredado `arriendocanchas`.
 | **route_guard** | ✅ Implementado | Middleware de protección de rutas en `route_guard.py` |
 | **Flet como UI** | ✅ Mantenido | Sin migración a otra tecnología |
 | **PostgreSQL como BD** | ✅ Mantenido | Sin migración a SQLite |
+| **DatabaseService multi-conexión** | 🟡 Deuda arquitectónica | Cada modelo crea su propia conexión; sin atomicidad real entre `DELETE disponibilidad` e `INSERT reserva`. Se corrige en Hito 4.4. |
 ---
 
 ## 4. Funcionalidades del MVP
@@ -58,11 +60,11 @@ tomando como base el repositorio heredado `arriendocanchas`.
 | 4 | CRUD Complejos (admin) | Alta | ⏳ Por validar en Hito 4.3 |
 | 5 | CRUD Canchas + Disponibilidad (admin) | Alta | ✅ Implementado, bugs corregidos |
 | 6 | Buscar complejos y canchas disponibles | Alta | ✅ Implementado |
-| 7 | Reservar cancha | Alta | 🟡 En validación (bug 4.1.4 bloqueante) |
+| 7 | Reservar cancha | Alta | ✅ Implementado (deuda arquitectónica: conexiones independientes, ver Hito 4.4) |
 | 8 | Ver/Cancelar mis reservas | Alta | ✅ Implementado |
 | 9 | Editar mi perfil | Media | ✅ Heredado funcional |
 | 10 | Panel admin con resumen de reservas | Media | ⏳ Pendiente |
-| 11 | Sistema de reclamos | Baja | ⏳ Pendiente (Hito 4.2) |
+| 11 | Sistema de reclamos | Baja | ✅ Implementado (Hito 4.2) |
 ---
 
 ## 5. Bugs Conocidos
@@ -70,9 +72,10 @@ tomando como base el repositorio heredado `arriendocanchas`.
 Ver [BUGS.md](./BUGS.md) para el registro detallado.
 
 **Resumen:**
-- BUG-003: Login no retorna `rut` (se corrige en Hito 4.2)
+- BUG-003: Login no retorna `rut` (corregido en Hito 4.2)
 - BUG-005/006: Vistas con SQL directo omiten campos opcionales (baja prioridad)
-- **BUG 4.1.4 🔴:** Error "No se pudo realizar la reserva" (bloqueante para Hito 4.1)
+- **BUG 4.1.4:** Error "No se pudo realizar la reserva" — archivado, su causa raíz es la deuda arquitectónica del patrón transaccional (conexiones independientes). Se corrige en Hito 4.4.
+- **Deuda arquitectónica:** `DatabaseService` crea conexiones independientes por instancia. Ver [HITO_4_SEGUIMIENTO.md](./HITO_4_SEGUIMIENTO.md) para detalle.
 ---
 
 ## 6. Hosting Objetivo
@@ -93,4 +96,3 @@ Ver [BUGS.md](./BUGS.md) para el registro detallado.
 - App móvil
 - Multi-idioma
 - Multi-complejo avanzado
-
