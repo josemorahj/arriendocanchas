@@ -33,8 +33,8 @@ class CanchaModel:
 
     def update_cancha(self, id_cancha, nombre_cancha, tipo_cancha, id_complejo, fecha_disponibilidad, id_imagen=None):
         query = """
-        UPDATE Canchas 
-        SET nombre_cancha = %s, tipo_cancha = %s, id_complejo = %s, fecha_disponibilidad = %s, id_imagen = %s 
+        UPDATE Canchas
+        SET nombre_cancha = %s, tipo_cancha = %s, id_complejo = %s, fecha_disponibilidad = %s, id_imagen = %s
         WHERE id_cancha = %s
         """
         self.cursor.execute(query, (nombre_cancha, tipo_cancha, id_complejo, fecha_disponibilidad, id_imagen, id_cancha))
@@ -119,8 +119,12 @@ class CanchaModel:
             self.db_service.connection.rollback()
             raise
 
-    def delete_disponibilidad(self, id_disponibilidad):
+    def delete_disponibilidad(self, id_disponibilidad, connection=None):
         query = "DELETE FROM DisponibilidadCanchas WHERE id_disponibilidad = %s"
+        if connection is not None:
+            cursor = connection.cursor()
+            cursor.execute(query, (id_disponibilidad,))
+            return cursor.rowcount
         self.cursor.execute(query, (id_disponibilidad,))
         return self.cursor.rowcount
 
