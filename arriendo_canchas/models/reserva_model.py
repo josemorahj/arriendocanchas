@@ -31,11 +31,15 @@ class ReservaModel:
             'estado': r[6]
         } for r in reservas]
 
-    def add_reserva(self, id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado='Confirmada'):
+    def add_reserva(self, id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado='Confirmada', connection=None):
         query = """
         INSERT INTO Reservas (id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado)
         VALUES (%s, %s, %s, %s, %s, %s)
         """
+        if connection is not None:
+            cursor = connection.cursor()
+            cursor.execute(query, (id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado))
+            return
         self.cursor.execute(query, (id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado))
         self.db_service.connection.commit()
 

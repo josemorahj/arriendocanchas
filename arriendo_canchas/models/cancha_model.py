@@ -94,11 +94,15 @@ class CanchaModel:
             'hora_fin': d[3]
         } for d in disponibilidad]
 
-    def add_disponibilidad(self, id_cancha, fecha, hora_inicio, hora_fin):
+    def add_disponibilidad(self, id_cancha, fecha, hora_inicio, hora_fin, connection=None):
         query = """
         INSERT INTO DisponibilidadCanchas (id_cancha, fecha, hora_inicio, hora_fin)
         VALUES (%s, %s, %s, %s)
         """
+        if connection is not None:
+            cursor = connection.cursor()
+            cursor.execute(query, (id_cancha, fecha, hora_inicio, hora_fin))
+            return
         try:
             self.cursor.execute(query, (id_cancha, fecha, hora_inicio, hora_fin))
             self.db_service.connection.commit()

@@ -263,37 +263,30 @@ def BuscarComplejosView(page, user_vm):
         )
 
         try:
-            # Cerrar cualquier transacción implícita
-            # abierta por consultas SELECT previas.
-            cancha_model.db_service.connection.rollback()
-
-            # Iniciar transacción.
-            cancha_model.db_service.connection.autocommit = (
-                False
-            )
-
-            # Eliminar la disponibilidad y comprobar
-            # cuántas filas fueron afectadas.
-            filas_eliminadas = (
-                cancha_model.delete_disponibilidad(
-                    id_disponibilidad
+            with (
+                cancha_model.db_service.transaction()
+                as connection
+            ):
+                # Eliminar la disponibilidad y comprobar
+                # cuántas filas fueron afectadas.
+                filas_eliminadas = (
+                    cancha_model.delete_disponibilidad(
+                        id_disponibilidad,
+                        connection=connection,
+                    )
                 )
-            )
+
+                if filas_eliminadas == 1:
+                    reserva_model.add_reserva(
+                        id_usuario,
+                        id_cancha,
+                        fecha_reserva,
+                        hora_inicio,
+                        hora_fin,
+                        connection=connection,
+                    )
 
             if filas_eliminadas == 1:
-                reserva_model.add_reserva(
-                    id_usuario,
-                    id_cancha,
-                    fecha_reserva,
-                    hora_inicio,
-                    hora_fin,
-                )
-
-                cancha_model.db_service.connection.commit()
-                cancha_model.db_service.connection.autocommit = (
-                    True
-                )
-
                 page.dialog = AlertDialog(
                     title=Text("Reserva Exitosa"),
                     content=Text(
@@ -316,11 +309,6 @@ def BuscarComplejosView(page, user_vm):
                 page.update()
 
             else:
-                cancha_model.db_service.connection.rollback()
-                cancha_model.db_service.connection.autocommit = (
-                    True
-                )
-
                 page.dialog = AlertDialog(
                     title=Text(
                         "Horario No Disponible"
@@ -342,11 +330,6 @@ def BuscarComplejosView(page, user_vm):
                 page.update()
 
         except Exception as ex:
-            cancha_model.db_service.connection.rollback()
-            cancha_model.db_service.connection.autocommit = (
-                True
-            )
-
             print(
                 f"Error en reservar_cancha: "
                 f"{type(ex).__name__}: {ex}",

@@ -1,6 +1,7 @@
 # services/database_service.py
 
 import os
+from contextlib import contextmanager
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2 import sql
@@ -50,3 +51,11 @@ class DatabaseService:
         if self.connection:
             self.connection.close()
 
+    @contextmanager
+    def transaction(self):
+        try:
+            yield self.connection
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
