@@ -40,31 +40,71 @@ class ReservaModel:
             cursor = connection.cursor()
             cursor.execute(query, (id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado))
             return
-        self.cursor.execute(query, (id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado))
-        self.db_service.connection.commit()
+        try:
+            self.cursor.execute(query, (id_usuario, id_cancha, fecha_reserva, hora_inicio, hora_fin, estado))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
 
-    def update_reserva(self, id_reserva, fecha_reserva, estado):
+    def update_reserva(self, id_reserva, fecha_reserva, estado, connection=None):
         query = """
         UPDATE Reservas 
         SET fecha_reserva = %s, estado = %s 
         WHERE id_reserva = %s
         """
-        self.cursor.execute(query, (fecha_reserva, estado, id_reserva))
-        self.db_service.connection.commit()
+        cursor = (
+            connection.cursor()
+            if connection is not None
+            else self.cursor
+        )
+        if connection is not None:
+            cursor.execute(query, (fecha_reserva, estado, id_reserva))
+            return
+        try:
+            cursor.execute(query, (fecha_reserva, estado, id_reserva))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
 
-    def delete_reserva(self, id_reserva):
+    def delete_reserva(self, id_reserva, connection=None):
         query = "DELETE FROM Reservas WHERE id_reserva = %s"
-        self.cursor.execute(query, (id_reserva,))
-        self.db_service.connection.commit()
+        cursor = (
+            connection.cursor()
+            if connection is not None
+            else self.cursor
+        )
+        if connection is not None:
+            cursor.execute(query, (id_reserva,))
+            return
+        try:
+            cursor.execute(query, (id_reserva,))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
 
-    def update_reserva_estado(self, id_reserva, estado):
+    def update_reserva_estado(self, id_reserva, estado, connection=None):
         query = """
         UPDATE Reservas 
         SET estado = %s 
         WHERE id_reserva = %s
         """
-        self.cursor.execute(query, (estado, id_reserva))
-        self.db_service.connection.commit()
+        cursor = (
+            connection.cursor()
+            if connection is not None
+            else self.cursor
+        )
+        if connection is not None:
+            cursor.execute(query, (estado, id_reserva))
+            return
+        try:
+            cursor.execute(query, (estado, id_reserva))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
 
     def fetch_reserva_by_id(self, id_reserva):
         query = """
