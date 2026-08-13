@@ -110,12 +110,16 @@ class CanchaModel:
             self.db_service.connection.rollback()
             raise
 
-    def update_disponibilidad(self, id_disponibilidad, fecha, hora_inicio, hora_fin):
+    def update_disponibilidad(self, id_disponibilidad, fecha, hora_inicio, hora_fin, connection=None):
         query = """
         UPDATE DisponibilidadCanchas
         SET fecha = %s, hora_inicio = %s, hora_fin = %s
         WHERE id_disponibilidad = %s
         """
+        if connection is not None:
+            cursor = connection.cursor()
+            cursor.execute(query, (fecha, hora_inicio, hora_fin, id_disponibilidad))
+            return
         try:
             self.cursor.execute(query, (fecha, hora_inicio, hora_fin, id_disponibilidad))
             self.db_service.connection.commit()
