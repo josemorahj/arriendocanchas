@@ -8,9 +8,9 @@ from models.reserva_model import ReservaModel
 def MisReservasView(page, user_vm):
     reserva_model = ReservaModel()
     id_usuario = user_vm.get_user()['id_usuario']
-    
+
     reservas_list = reserva_model.fetch_reservas(id_usuario)
-    
+
     reservas_table = DataTable(
         columns=[
             DataColumn(Text("Cancha")),
@@ -33,7 +33,7 @@ def MisReservasView(page, user_vm):
             ]
         ) for r in reservas_list]
     )
-    
+
     def cancelar_reserva(reserva):
         def confirm_cancel(e):
             id_reserva = reserva['id_reserva']
@@ -61,7 +61,7 @@ def MisReservasView(page, user_vm):
                 print(f"Error al cancelar reserva: {ex}")
                 page.dialog.open = False
                 page.update()
-        
+
         page.dialog = AlertDialog(
             title=Text("Cancelar Reserva"),
             content=Text(f"¿Está seguro de cancelar la reserva de la cancha {reserva['nombre_cancha']} el {reserva['fecha_reserva']}?"),
@@ -73,7 +73,7 @@ def MisReservasView(page, user_vm):
         )
         page.dialog.open = True
         page.update()
-    
+
     return Column(
         [
             Text("Mis Reservas", size=24, weight="bold"),

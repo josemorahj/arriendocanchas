@@ -1,11 +1,9 @@
-# arriendo_canchas/arriendo_canchas/models/cancha_model.py
-
 import psycopg2
 from services.database_service import DatabaseService
 
 class CanchaModel:
-    def __init__(self):
-        self.db_service = DatabaseService()
+    def __init__(self, db_service=None):
+        self.db_service = db_service or DatabaseService()
         self.cursor = self.db_service.cursor
 
     def fetch_canchas(self, id_usuario):
@@ -35,8 +33,8 @@ class CanchaModel:
 
     def update_cancha(self, id_cancha, nombre_cancha, tipo_cancha, id_complejo, fecha_disponibilidad, id_imagen=None):
         query = """
-        UPDATE Canchas 
-        SET nombre_cancha = %s, tipo_cancha = %s, id_complejo = %s, fecha_disponibilidad = %s, id_imagen = %s 
+        UPDATE Canchas
+        SET nombre_cancha = %s, tipo_cancha = %s, id_complejo = %s, fecha_disponibilidad = %s, id_imagen = %s
         WHERE id_cancha = %s
         """
         self.cursor.execute(query, (nombre_cancha, tipo_cancha, id_complejo, fecha_disponibilidad, id_imagen, id_cancha))
@@ -66,6 +64,20 @@ class CanchaModel:
             }
         return None
 
+    def fetch_canchas_by_complejo(self, id_complejo):
+        query = """
+        SELECT id_cancha, nombre_cancha, tipo_cancha
+        FROM Canchas
+        WHERE id_complejo = %s
+        """
+        self.cursor.execute(query, (id_complejo,))
+        canchas = self.cursor.fetchall()
+        return [{
+            'id_cancha': c[0],
+            'nombre_cancha': c[1],
+            'tipo_cancha': c[2]
+        } for c in canchas]
+
     def fetch_disponibilidad(self, id_cancha):
         query = """
         SELECT id_disponibilidad, fecha, hora_inicio, hora_fin
@@ -81,28 +93,48 @@ class CanchaModel:
             'hora_inicio': d[2],
             'hora_fin': d[3]
         } for d in disponibilidad]
-    
-    def add_disponibilidad(self, id_cancha, fecha, hora_inicio, hora_fin):
+
+    def add_disponibilidad(self, id_cancha, fecha, hora_inicio, hora_fin, connection=None):
         query = """
         INSERT INTO DisponibilidadCanchas (id_cancha, fecha, hora_inicio, hora_fin)
         VALUES (%s, %s, %s, %s)
         """
-        self.cursor.execute(query, (id_cancha, fecha, hora_inicio, hora_fin))
-        self.db_service.connection.commit()
-    
-    def update_disponibilidad(self, id_disponibilidad, fecha, hora_inicio, hora_fin):
+        if connection is not None:
+            cursor = connection.cursor()
+            cursor.execute(query, (id_cancha, fecha, hora_inicio, hora_fin))
+            return
+        try:
+            self.cursor.execute(query, (id_cancha, fecha, hora_inicio, hora_fin))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
+
+    def update_disponibilidad(self, id_disponibilidad, fecha, hora_inicio, hora_fin, connection=None):
         query = """
         UPDATE DisponibilidadCanchas
         SET fecha = %s, hora_inicio = %s, hora_fin = %s
         WHERE id_disponibilidad = %s
         """
-        self.cursor.execute(query, (fecha, hora_inicio, hora_fin, id_disponibilidad))
-        self.db_service.connection.commit()
-    
-    def delete_disponibilidad(self, id_disponibilidad):
+        if connection is not None:
+            cursor = connection.cursor()
+            cursor.execute(query, (fecha, hora_inicio, hora_fin, id_disponibilidad))
+            return
+        try:
+            self.cursor.execute(query, (fecha, hora_inicio, hora_fin, id_disponibilidad))
+            self.db_service.connection.commit()
+        except Exception:
+            self.db_service.connection.rollback()
+            raise
+
+    def delete_disponibilidad(self, id_disponibilidad, connection=None):
         query = "DELETE FROM DisponibilidadCanchas WHERE id_disponibilidad = %s"
+        if connection is not None:
+            cursor = connection.cursor()
+            cursor.execute(query, (id_disponibilidad,))
+            return cursor.rowcount
         self.cursor.execute(query, (id_disponibilidad,))
-        self.db_service.connection.commit()
-    
+        return self.cursor.rowcount
+
     def close(self):
         self.db_service.close()

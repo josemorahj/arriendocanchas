@@ -1,61 +1,37 @@
-# Arriendocanchas
+# ArriendoCanchas.cl
 
-Proyecto de arriendo de canchas.
+Plataforma de arriendo de canchas deportivas construida con **Flet + PostgreSQL**.
 
-## Tabla de Contenidos
+> ⚠️ **Nota:** Este repositorio es una adaptación personal del proyecto original
+> [arriendocanchas](https://github.com/HernanEspinozaDev/arriendocanchas).
+> Se redujo de 6 roles a 2 (Administrador y Usuario), se migró el hashing
+> de contraseñas de `crypt()` de PostgreSQL a `passlib`, y se cargan las
+> credenciales desde variables de entorno.
 
-- [Clonar el Proyecto](#clonar-el-proyecto)
-- [Crear Entorno Virtual](#crear-entorno-virtual)
-- [Activar el Entorno Virtual](#activar-el-entorno-virtual)
-  - [Windows](#windows)
-  - [macOS/Linux](#macoslinux)
-- [Desactivar el Entorno Virtual](#desactivar-el-entorno-virtual)
-- [Instalar las Librerías Necesarias](#instalar-las-librerías-necesarias)
-- [Dirigirse al Proyecto](#dirigirse-al-proyecto)
-- [Iniciar el Proyecto](#iniciar-el-proyecto)
+---
 
-## Clonar el Proyecto
+## Estado del Proyecto
 
-Primero, clona el repositorio desde GitHub y navega al directorio del proyecto:
+| Hito | Estado | Descripción |
+|---|---|---|
+| **Hito 0** | ✅ Completado | Preparación del entorno (variables de entorno, passlib, BD local) |
+| **Hito 1** | ✅ Completado | Schema SQL, seed data, documentación de bugs |
+| **Hito 2** | ✅ Completado | Consolidación de roles (6 → 2: Administrador, Usuario) |
+| **Hito 3** | ✅ Completado | Protección de rutas autenticadas con `route_guard` |
+| **Hito 4** | ✅ Completado | Reservas + Reclamos + Datos semilla + Documentación |
+| **Hito 4.4** | ⏳ Pendiente | Corrección del patrón transaccional (conexiones compartidas) |
 
-```bash
-git clone https://github.com/HernanEspinozaDev/arriendocanchas.git
-cd arriendocanchas
+> ⚠️ **Freeze transaccional vigente:** Hasta iniciar oficialmente el Hito 4.4, no modificar:
+> - `reserva_model.py`, `cancha_model.py`, `buscar_complejos_view.py`
+> - Ni ningún archivo que coordine la transacción de reservas.
+>
+> **Deuda arquitectónica:** `DatabaseService` crea una conexión PostgreSQL por instancia. Esto impide atomicidad real en el flujo de reservas, donde `DELETE disponibilidad` y `INSERT reserva` ocurren en conexiones distintas. Esta deuda se abordará exclusivamente en el Hito 4.4.
+---
 
-Crear Entorno Virtual
-Crea un entorno virtual para gestionar las dependencias del proyecto. Puedes usar uno de los siguientes comandos:
+## Requisitos
 
-python -m venv venv
-o
-python3 -m venv venv
+- Python 3.10–3.12 (no 3.13, Flet puede tener incompatibilidades)
+- PostgreSQL 15+
+- pip
 
-Activar el Entorno Virtual
-
-Windows
-Activa el entorno virtual ejecutando:
-venv\Scripts\activate
-
-macOS/Linux
-Activa el entorno virtual ejecutando:
-
-source venv/bin/activate
-
-Desactivar el Entorno Virtual
-Para desactivar el entorno virtual, simplemente ejecuta:
-
-deactivate
-
-Instalar las Librerías Necesarias
-Con el entorno virtual activado, instala las dependencias del proyecto usando:
-
-pip install -r requirements.txt
-
-Dirigirse al Proyecto
-Navega al directorio principal del proyecto:
-
-cd arriendo_canchas
-
-Iniciar el Proyecto
-Finalmente, inicia el proyecto ejecutando:
-
-python main.py
+## Instalación

@@ -1,6 +1,14 @@
-# HITO 0: Preparación Controlada del Entorno
+# HITO 0: Preparación Controlada del Entorno ✅ COMPLETADO
 
-## Plan Técnico Detallado
+> **Este hito fue ejecutado exitosamente.** Ver commits:
+> - `78366d4` — migración a passlib
+> - `8cf3d1a` — variables de entorno
+>
+> Para el estado actual del proyecto, ver [README.md](./README.md), [ALCANCE_ADAPTACION.md](./ALCANCE_ADAPTACION.md) y [HITO_4_SEGUIMIENTO.md](./HITO_4_SEGUIMIENTO.md).
+
+---
+
+## Plan Técnico Detallado (archivo histórico)
 
 > **Objetivo:** Tener la app corriendo localmente conectada a una base de datos PostgreSQL local (no RDS), con variables de entorno, sin credenciales hardcodeadas, y reemplazando `crypt()` de PostgreSQL por `passlib` (Python puro).
 >
