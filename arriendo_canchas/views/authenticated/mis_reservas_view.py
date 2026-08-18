@@ -39,12 +39,7 @@ def MisReservasView(page, user_vm):
             id_reserva = reserva['id_reserva']
             try:
                 # Actualizar el estado de la reserva a 'Cancelada'
-                with reserva_model.db_service.transaction() as connection:
-                    reserva_model.update_reserva_estado(
-                        id_reserva,
-                        'Cancelada',
-                        connection=connection,
-                    )
+                reserva_model.update_reserva_estado(id_reserva, 'Cancelada')
                 page.dialog.open = False
                 page.update()
                 # Refrescar la lista de reservas
