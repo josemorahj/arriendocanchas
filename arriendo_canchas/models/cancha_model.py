@@ -2,8 +2,8 @@ import psycopg2
 from services.database_service import DatabaseService
 
 class CanchaModel:
-    def __init__(self):
-        self.db_service = DatabaseService()
+    def __init__(self, db_service=None):
+        self.db_service = db_service or DatabaseService()
         self.cursor = self.db_service.cursor
 
     def fetch_canchas(self, id_usuario):

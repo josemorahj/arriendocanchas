@@ -17,12 +17,14 @@ from flet import (
 from models.cancha_model import CanchaModel
 from models.complejo_model import ComplejoModel
 from models.reserva_model import ReservaModel
+from services.database_service import DatabaseService
 
 
 def BuscarComplejosView(page, user_vm):
     complejo_model = ComplejoModel()
-    cancha_model = CanchaModel()
-    reserva_model = ReservaModel()
+    db_service = DatabaseService()
+    cancha_model = CanchaModel(db_service)
+    reserva_model = ReservaModel(db_service)
 
     id_usuario_actual = user_vm.get_user()["id_usuario"]
 

@@ -4,8 +4,8 @@ import psycopg2
 from services.database_service import DatabaseService
 
 class ReservaModel:
-    def __init__(self):
-        self.db_service = DatabaseService()
+    def __init__(self, db_service=None):
+        self.db_service = db_service or DatabaseService()
         self.cursor = self.db_service.cursor
 
     def fetch_reservas(self, id_usuario=None):
